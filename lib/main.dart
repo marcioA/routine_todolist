@@ -1,132 +1,59 @@
-import 'package:english_words/english_words.dart';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
-void main() {
-  runApp(MyApp());
-}
+/// Flutter code sample for [CheckboxListTile].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const CheckboxListTileApp());
+
+class CheckboxListTileApp extends StatelessWidget {
+  const CheckboxListTileApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        home: MyHomePage(),
-      ),
+    return MaterialApp(
+      theme: ThemeData(useMaterial3: true),
+      home: const CheckboxListTileExample(),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class CheckboxListTileExample extends StatefulWidget {
+  const CheckboxListTileExample({super.key});
 
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  var favorites = <WordPair>[];
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
-    } else {
-      favorites.add(current);
-    }
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<CheckboxListTileExample> createState() =>
+      _CheckboxListTileExampleState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
+  List<String> taskList = ["Alice", "Bob", "Carol"];
+  var backColorChecked = Color.fromRGBO(255, 255, 255, 1);
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = Placeholder();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        body: Row(
-          children: [
-            SafeArea(
-              child: NavigationRail(
-                extended: constraints.maxWidth >= 600,
-                destinations: [
-                  NavigationRailDestination(
-                    icon: Icon(Icons.home),
-                    label: Text('Home'),
-                  ),
-                  NavigationRailDestination(
-                    icon: Icon(Icons.favorite),
-                    label: Text('Favorites'),
-                  ),
-                ],
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (value) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('CheckboxListTile Sample')),
+      body: Center(
+          child: Column(
+        children: [
+          for (var taskItem in taskList)
+            CheckboxListTile(
+                title: Text(taskItem),
+                value: timeDilation != 1.0,
+                onChanged: (bool? value) {
                   setState(() {
-                    selectedIndex = value;
+                    timeDilation = value! ? 2.0 : 1.0;
+                    backColorChecked = value
+                        ? Color.fromRGBO(0, 255, 0, 1)
+                        : Color.fromRGBO(255, 255, 255, 1);
                   });
                 },
-              ),
-            ),
-            Expanded(
-              child: Container(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: page,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [],
-          ),
+                secondary: const Icon(Icons.hourglass_empty),
+                tileColor: backColorChecked)
         ],
-      ),
+      )),
     );
   }
 }
