@@ -52,6 +52,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
                 },
                 secondary: const Icon(Icons.hourglass_empty),
                 tileColor: backColorChecked)
+                value = 1;
         ],
       )),
     );
